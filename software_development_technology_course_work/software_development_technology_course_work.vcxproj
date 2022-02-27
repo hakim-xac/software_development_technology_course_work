@@ -145,6 +145,7 @@
     <ClCompile Include="software_development_technology_course_work.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="enums.h" />
     <ClInclude Include="include_modules.h" />
     <ClInclude Include="Interface.h" />
   </ItemGroup>

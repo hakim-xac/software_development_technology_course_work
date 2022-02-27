@@ -29,5 +29,8 @@
     <ClInclude Include="include_modules.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="enums.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
