@@ -141,10 +141,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Calculate.cpp" />
     <ClCompile Include="Interface.cpp" />
     <ClCompile Include="software_development_technology_course_work.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Calculate.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="include_modules.h" />
     <ClInclude Include="Interface.h" />
