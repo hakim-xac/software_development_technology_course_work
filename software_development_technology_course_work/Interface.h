@@ -1,32 +1,66 @@
 #pragma once
 #include "include_modules.h"
+//#include "Calculate.h"
 
 namespace COURSE_WORK {
     /// <summary>
     /// namespace COURSE_WORK
     /// </summary>
+
+
+
+    // концепты.. проверка на итерабельность
+    template <typename T, typename = void>
+    struct is_iterable : std::false_type {};
+
+    // this gets used only when we can call std::begin() and std::end() on that type
+    template <typename T>
+    struct is_iterable<T
+        , std::void_t<decltype(std::begin(std::declval<T>()))
+        , decltype(std::end(std::declval<T>()))
+        >> : std::true_type {};
+
+    // Here is a helper:
+    template <typename T>
+    constexpr bool is_iterable_v = is_iterable<T>::value;
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="Type"></typeparam>
+    /// <typeparam name=""></typeparam>
+
     template <typename Type
         , typename = std::enable_if_t <std::is_same_v<Type, std::string>>>
         class Interface
     {
-        /*	widthTable	*/
+
+
+
+
+
+        /*	maxWidthTable	*/
         static constexpr const size_t widthTable{ 100 };
         std::istream& in;
         std::ostream& out;
         std::ostream& err;
         std::queue<Type> buffer;
+        std::queue<Type> calcBuffer;
+        Type filename;
 
         
     private:
 
+        Interface() = delete;
         Interface(const Interface&) = delete;
         Interface(const Interface&&) = delete;
         Interface& operator = (const Interface&) = delete;
         Interface& operator = (const Interface&&) = delete;
 
-
         /* разделитель */
-        constexpr Type delimiter(char del = '=') {
+        constexpr Type 
+        delimiter(char del = '=') {
             Type result{ Type(widthTable, del) };
             result.front() = result.back() = '#';
             return result;
@@ -34,10 +68,11 @@ namespace COURSE_WORK {
 
 
         /*  создает строку по определенному формату */
-        constexpr Type generatingString(Type&& str
-                                    , Type&& str2 = Type("")
-                                    , char del = '='
-                                    , FormatingType ft = FormatingType::STANDART) {
+        constexpr Type 
+        generatingString( Type&& str
+                        , Type&& str2 = Type("")
+                        , char del = '='
+                        , FormatingType ft = FormatingType::STANDART) {
 
             /// <param name="first_str">первая строка, располагается слева (или по центру, если 2 строка пуста)</param>
             /// <param name="second_str"> правая строка</param>
@@ -78,7 +113,8 @@ namespace COURSE_WORK {
 
 
         /* вставляет в строку to в позицию pos, строку in, замещая собой символы строки to */
-        constexpr void insertInSitring(Type& to, std::size_t pos, const Type& in ) {
+        constexpr void 
+        insertInSitring(Type& to, std::size_t pos, const Type& in ) {
             if (to.empty())						throw;
             if (to.size() < pos)				throw;
             if (to.size() < in.size())			throw;
@@ -90,13 +126,15 @@ namespace COURSE_WORK {
 
         /* создает  в стеке, строку elem */
         template <typename T>
-        constexpr void toBuffer(T&& elem) {
+        constexpr void
+        toBuffer(T&& elem) {
             buffer.emplace(std::forward<T>(elem));
         }
 
 
         /* "печатает" в поток out, буфер */
-        constexpr void flush() {
+        constexpr void 
+        flush() {
             while (!buffer.empty())
             {
                 out << buffer.front() << "\n";
@@ -105,8 +143,68 @@ namespace COURSE_WORK {
         }
 
 
+        /* функция логирования */
+        template <typename... Args>
+        constexpr void
+        to_log(Args&&... args) {
+            err << delimiter('-') << "\n";
+            ((err << generatingString(std::forward<Args>(args), "", ' ') << "\n"), ...);
+            err << delimiter('-') << "\n";
+        }
+
+
+    protected:
+
+
+        /* Принимаем данные от пользователя */
+        constexpr void
+        showError(ErrorCodes key) {
+            static std::map<ErrorCodes, std::string> base{
+                {ErrorCodes::FileOpenError, "Ошибка открытия файла" },
+                {ErrorCodes::FileReadError, "Ошибка чтения файла" }
+            };
+            if (base.find(key) == base.end()) {
+                to_log("Неизвестная ошибка!");
+                return;
+            }
+            to_log(std::move(base[key]));
+        }
+
+        /* */
+        constexpr void
+            showBody() {
+
+        }
+
+        /* Принимаем данные от пользователя (путь к файлу с выражением постфиксной (польской) формой записи) */
+        constexpr std::decay_t<Type>
+        inputRead() {
+            Type filename{};
+            out << delimiter(' ') << "\n";
+            out << generatingString("ВВЕДИТЕ ПУТЬ К ФАЙЛУ:") << "\n";
+            out << delimiter(' ') << "\n";
+            out << std::string(widthTable, '_');
+            out << std::string(widthTable, '\b');
+            
+            in >> filename;
+            return filename;
+        }
+
+
+        /*  */
+        template <typename Iter, typename = std::enable_if_t<is_iterable<Iter>>>
+        constexpr void
+        toCaclBuffer(Iter begin, Iter end) {
+            auto it{ begin };
+            while (it != end) {
+                calcBuffer.push(*it);
+            }
+        }
+
+
         /* Создает заголовок и отправляет в буфер */
-        constexpr void showHeader() {
+        constexpr void
+            showHeader() {
             toBuffer(delimiter());
             toBuffer(generatingString("Группа", "ПБ-21", ' ', FormatingType::JUSTIFY));
             toBuffer(delimiter('-'));
@@ -121,68 +219,7 @@ namespace COURSE_WORK {
 
             flush();
         }
-
-
-        /* Принимаем данные от пользователя */
-        constexpr void showBody() {
-            toBuffer(delimiter(' '));
-            toBuffer(delimiter('-'));
-            toBuffer(generatingString("Введите путь к файлу:", "", ' '));
-            toBuffer(delimiter('-'));
-
-            flush();
-            Type tmp;
-            in >> tmp;
-            if (in.fail()) {
-                to_log("Ошибка чтения из потока ввода!");
-                return;
-            }
-            
-            auto[queue, isRead] = readFile(tmp);
-            if (!isRead) {
-                to_log("[" + tmp + "]", "Ошибка чтение файла !!");
-                return;
-            }
-            if (queue.empty()) {
-                to_log("[" + tmp + " ]", "ФАЙЛ ПУСТ !");
-            }
-
-        }
-
-
-        /* функция логирования */
-        template <typename... Args>
-        constexpr void to_log(Args&&... args) {
-            err << delimiter('-') << "\n";
-            ((err << generatingString(std::forward<Args>(args), "", ' ') << "\n"), ...);
-            err << delimiter('-') << "\n";
-        }
-
-
-        /* Читает файл и возвращает пару очередь, и логическую операцию успешного чтения  */
-        constexpr std::pair<std::queue<std::string>, bool> readFile(const Type& str) {
-            std::ifstream fs{ str };
-            std::queue<std::string> queue;
-            if (!fs.is_open()) {
-                return { queue, false };
-            }
-            std::string s;
-            while (fs >> s) {
-                queue.push(s);
-            }  
-            return { queue, true };
-        }
-
-
     public:
-
-
-        /* конструктор */
-        Interface()
-        : in(std::cin)
-        , out(std::cout)
-        , err(std::cerr)
-        , buffer() {}
 
 
         /* конструктор */
@@ -192,19 +229,12 @@ namespace COURSE_WORK {
         , err(err)
         , buffer() {}
 
-
+                
         /* деструктор */
         ~Interface() {}
 
 
-        /* главная функция-член, запрашивает путь к файлу с выражением и выполняет его, если оно без ошибок */
-        constexpr void loop() {
-            std::ios::sync_with_stdio(0);
-            setlocale(LC_ALL, "Russian");
 
-            showHeader();
-            showBody();
-        }
 
         
     };

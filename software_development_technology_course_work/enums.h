@@ -6,3 +6,10 @@ enum class FormatingType{
 };
 
 
+/**/
+enum class ErrorCodes {
+    FileIsOpen
+    , FileOpenError
+    , FileReadError
+};
+
