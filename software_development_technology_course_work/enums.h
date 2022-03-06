@@ -8,8 +8,10 @@ enum class FormatingType{
 
 /**/
 enum class ErrorCodes {
-    FileIsOpen
+    AllGood
+    , FileIsOpen
     , FileOpenError
     , FileReadError
+    , FileParseError
 };
 

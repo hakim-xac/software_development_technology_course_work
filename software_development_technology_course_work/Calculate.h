@@ -11,6 +11,8 @@ namespace COURSE_WORK {
         using Interface<Type>::showBody;
         using Interface<Type>::showError;
         using Interface<Type>::inputRead;
+        using Interface<Type>::out;
+        using Interface<Type>::toCaclBuffer;
     private:
 
         
@@ -37,6 +39,53 @@ namespace COURSE_WORK {
             return { vec, ErrorCodes::FileIsOpen };
         }
 
+
+        /*  производит проверку и вычисление выражения  */
+        template <typename Iter, typename = std::enable_if_t<is_iterable_v<Iter>>>
+        constexpr std::pair<long long, ErrorCodes>
+        parse(Iter begin, Iter end) { 
+            std::stack<long long> stack;
+            auto it{ begin };
+            std::stringstream ss;
+            while (it != end) {
+                               
+                switch(stack.size()) {
+                 case 0: case 1:
+                    ss.clear();
+                    long long tmp;
+                    ss << *it;
+                    ss >> tmp;
+
+                    if (ss.fail()) return { 0ll, ErrorCodes::FileParseError };
+                    stack.push(tmp);
+                   break;
+                 case 2:
+
+                    if (*it == std::string("+")) {
+                        //auto [a, b] = stack;                      //TO DO
+                    }
+                    else if (*it == std::string("-")) {
+                        std::cout << "minus";
+                    }
+                    else if (*it == std::string("/")) {
+                        std::cout << "divition";
+                    }
+                    else if (*it == std::string("*")) {
+                        std::cout << "multyply";
+                    }
+                    else { std::cout << "error"; }
+
+                    return { 0ll, ErrorCodes::AllGood };
+                    break;
+                 default:   return { 0ll, ErrorCodes::FileParseError }; break;
+                     
+                }
+                ++it;
+            }
+
+            return {0ll, ErrorCodes::AllGood };
+        }
+
     public:
 
         Calculate()
@@ -46,12 +95,6 @@ namespace COURSE_WORK {
         Calculate( std::istream& in, std::ostream& out, std::ostream& err)
         : Interface<Type>(in, out, err) {}
 
-
-        /*  распечатывает контейнер в вывод */
-        constexpr void
-        print() {
-            //std::copy(vec.begin(), vec.end(), std::ostream_iterator<Type>(out, " "));
-        }
 
 
         /* главная функция-член, запрашивает путь к файлу с выражением и выполняет его, если оно без ошибок */
@@ -64,7 +107,13 @@ namespace COURSE_WORK {
             Type filename{ inputRead() };
             auto [vec, isRead] = readFile(filename);
             if (isRead != ErrorCodes::FileIsOpen) showError(isRead);
-
+            auto [result, isParse] = parse(vec.begin(), vec.end());
+            if (isParse == ErrorCodes::AllGood) {
+                out << "result\t" << result << "\n";
+            }
+            else {
+                out << "not ok";
+            }
             showBody(); // TODO
         }
 
