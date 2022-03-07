@@ -14,6 +14,18 @@ namespace COURSE_WORK
         , decltype(++std::declval<Iter&>())
         >> : std::true_type {};
     // } end block is_iterable
+    // { start block is_container
+    template <typename T, typename = void>
+    struct is_container : std::false_type {};
+
+    template <typename Con>
+    struct is_container<Con
+        , std::void_t<decltype(std::begin(std::declval<Con&>()))
+        , decltype(std::end(std::declval<Con&>()))
+        , decltype(std::declval<Con&>().empty())
+        , decltype(std::declval<Con&>().size())
+        >> : std::true_type {};
+    // } end block is_container
     
  
 
@@ -23,6 +35,12 @@ namespace COURSE_WORK
     // using is_iterable<Iter>::value
     template <typename Iter>
     constexpr bool is_iterable_v = is_iterable<Iter>::value;
+
+
+    // template <typename Iter>
+    // using is_container<Iter>::value
+    template <typename Iter>
+    constexpr bool is_container_v = is_container<Iter>::value;
 
 
 };

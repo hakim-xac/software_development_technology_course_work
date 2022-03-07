@@ -12,8 +12,7 @@ namespace COURSE_WORK {
         using Interface<Type>::showError;
         using Interface<Type>::inputRead;
         using Interface<Type>::out;
-        using Interface<Type>::toCaclBuffer;
-    private:
+    private:                                            /* PRIVATE SECTIONS */
 
         
 
@@ -23,7 +22,7 @@ namespace COURSE_WORK {
         /  возвращает пустой контейнер и false, если чтение не успешное
         /  */
         constexpr std::pair<std::vector<std::string>, ErrorCodes>
-            readFile(const Type& str) {
+            readFile(const Type& str) const {
             std::ifstream fs{ str };
             std::vector<std::string> vec;
             if (!fs.is_open()) {
@@ -36,6 +35,7 @@ namespace COURSE_WORK {
                 vec.emplace_back(s);
             }
             vec.shrink_to_fit();
+            if (vec.empty()) return { vec, ErrorCodes::FileEmpty };
             return { vec, ErrorCodes::FileIsOpen };
         }
 
@@ -43,55 +43,63 @@ namespace COURSE_WORK {
         /*  производит проверку и вычисление выражения  */
         template <typename Iter, typename = std::enable_if_t<is_iterable_v<Iter>>>
         constexpr std::pair<long long, ErrorCodes>
-        parse(Iter begin, Iter end) { 
+        parse(Iter begin, Iter end) const {
+            if(end - begin < 3) return { 0ll, ErrorCodes::FileNotValid };
             std::stack<long long> stack;
             auto it{ begin };
             std::stringstream ss;
             while (it != end) {
                                
-                switch(stack.size()) {
-                 case 0: case 1:
+                if (*it == "+") {
+                    if(stack.size() < 2) return { 0ll, ErrorCodes::FileParseError };
+                    auto r{ stack.top() };
+                    stack.pop();
+                    auto l{ stack.top() };
+                    stack.pop();
+                    stack.push(l + r);
+                }
+                else if (*it == "-") {
+                    if (stack.size() < 2) return { 0ll, ErrorCodes::FileParseError };
+                    auto r{ stack.top() };
+                    stack.pop();
+                    auto l{ stack.top() };
+                    stack.pop();
+                    stack.push(l - r);
+                }
+                else if (*it == "/") {
+                    if (stack.size() < 2) return { 0ll, ErrorCodes::FileParseError };
+                    auto r{ stack.top() };
+                    stack.pop();
+                    auto l{ stack.top() };
+                    stack.pop();
+                    stack.push(l / r);
+                }
+                else if (*it == "*") {
+                    if (stack.size() < 2) return { 0ll, ErrorCodes::FileParseError };
+                    auto r{ stack.top() };
+                    stack.pop();
+                    auto l{ stack.top() };
+                    stack.pop();
+                    stack.push(l * r);
+                }
+                else {
                     ss.clear();
-                    long long tmp;
                     ss << *it;
+                    long long tmp;
                     ss >> tmp;
-
-                    if (ss.fail()) return { 0ll, ErrorCodes::FileParseError };
+                    if( ss.fail() ) return { 0ll, ErrorCodes::FileParseError };
                     stack.push(tmp);
-                   break;
-                 case 2:
-
-                    if (*it == std::string("+")) {
-                        //auto [a, b] = stack;                      //TO DO
-                    }
-                    else if (*it == std::string("-")) {
-                        std::cout << "minus";
-                    }
-                    else if (*it == std::string("/")) {
-                        std::cout << "divition";
-                    }
-                    else if (*it == std::string("*")) {
-                        std::cout << "multyply";
-                    }
-                    else { std::cout << "error"; }
-
-                    return { 0ll, ErrorCodes::AllGood };
-                    break;
-                 default:   return { 0ll, ErrorCodes::FileParseError }; break;
-                     
                 }
                 ++it;
             }
-
-            return {0ll, ErrorCodes::AllGood };
+            return { stack.top(), ErrorCodes::AllGood };
         }
 
-    public:
+    public:                                                 /* PUBLIC SECTIONS */
 
         Calculate()
         : Interface<Type>(std::cin, std::cout, std::cerr) {}
 
-        template <typename T>
         Calculate( std::istream& in, std::ostream& out, std::ostream& err)
         : Interface<Type>(in, out, err) {}
 
@@ -104,17 +112,18 @@ namespace COURSE_WORK {
             setlocale(LC_ALL, "Russian");
 
             showHeader();
-            Type filename{ inputRead() };
-            auto [vec, isRead] = readFile(filename);
-            if (isRead != ErrorCodes::FileIsOpen) showError(isRead);
+            auto [vec, isRead] = readFile( inputRead() );
+            if (isRead != ErrorCodes::FileIsOpen) {
+                showError(isRead);
+                return;
+            }
             auto [result, isParse] = parse(vec.begin(), vec.end());
-            if (isParse == ErrorCodes::AllGood) {
-                out << "result\t" << result << "\n";
+            if (isParse != ErrorCodes::AllGood) {
+                showError(isParse);
+                return;
             }
-            else {
-                out << "not ok";
-            }
-            showBody(); // TODO
+
+            showBody(vec, result);
         }
 
     };

@@ -6,10 +6,12 @@ enum class FormatingType{
 };
 
 
-/**/
+/* Коды ошибок, используемые в проекте */
 enum class ErrorCodes {
     AllGood
     , FileIsOpen
+    , FileEmpty
+    , FileNotValid
     , FileOpenError
     , FileReadError
     , FileParseError

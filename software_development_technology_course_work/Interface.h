@@ -2,63 +2,67 @@
 #include "include_modules.h"
 //#include "Calculate.h"
 
-namespace COURSE_WORK {
-    /// <summary>
-    /// namespace COURSE_WORK
-    /// </summary>
-
-    
+namespace COURSE_WORK {   
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <typeparam name="Type"></typeparam>
-    /// <typeparam name=""></typeparam>
 
     template <typename Type
         , typename = std::enable_if_t <std::is_same_v<Type, std::string>>>
         class Interface
     {
+                                        /* Класс-Интерфейс */
 
-
-
-
-
-        /*	maxWidthTable	*/
+        /*	максимальная ширина строки	*/
         static constexpr const size_t widthTable{ 100 };
         std::queue<Type> buffer;
         std::queue<Type> calcBuffer;
         Type filename;
-    protected:
+    protected:                                               /* PROTECTED SECTIONS */
 
         std::istream& in;
         std::ostream& out;
         std::ostream& err;
         
-    private:
+    private:                                                /* PRIVATE SECTIONS */
 
+        /* Запрещаем:
+            пустой конструктор
+            , конструктор копирования
+            , конструктор перемещения
+            , оператор копирования
+            , опретор перемещения 
+        */
         Interface() = delete;
         Interface(const Interface&) = delete;
         Interface(const Interface&&) = delete;
         Interface& operator = (const Interface&) = delete;
         Interface& operator = (const Interface&&) = delete;
 
-        /* разделитель */
+
+        /* строка-разделитель */
         constexpr Type 
-        delimiter(char del = '=') {
+        delimiter(char del = '=') const {
             Type result{ Type(widthTable, del) };
             result.front() = result.back() = '#';
             return result;
         }
 
+        /*  создает строку по определенному формату */
+        //  принимает 1 левый параметр 
+        constexpr Type
+            generatingString(Type& str
+                , char del = ' '
+                , FormatingType ft = FormatingType::STANDART) {
+            return generatingString(std::move(str), Type(""), del, ft);
+        }
 
         /*  создает строку по определенному формату */
-        constexpr Type 
-        generatingString( Type&& str
-                        , Type&& str2 = Type("")
-                        , char del = '='
-                        , FormatingType ft = FormatingType::STANDART) {
+        //  принимает 2 правых параметра 
+        constexpr Type
+        generatingString(Type&& str
+            , Type&& str2 = Type("")
+            , char del = ' '
+            , FormatingType ft = FormatingType::STANDART) {
 
             /// <param name="first_str">первая строка, располагается слева (или по центру, если 2 строка пуста)</param>
             /// <param name="second_str"> правая строка</param>
@@ -100,7 +104,7 @@ namespace COURSE_WORK {
 
         /* вставляет в строку to в позицию pos, строку in, замещая собой символы строки to */
         constexpr void 
-        insertInString(Type& to, std::size_t pos, const Type& in ) {
+        insertInString(Type& to, std::size_t pos, const Type& in ) const {
             if (to.empty())						throw;
             if (to.size() < pos)				throw;
             if (to.size() < in.size())			throw;
@@ -139,15 +143,17 @@ namespace COURSE_WORK {
         }
 
 
-    protected:
+    protected:                                              /* PROTECTED SECTIONS */
 
 
-        /* Принимаем данные от пользователя */
+        /* Печатаем ошибку на вывод */
         constexpr void
         showError(ErrorCodes key) {
             static std::map<ErrorCodes, std::string> base{
-                {ErrorCodes::FileOpenError, "Ошибка открытия файла" },
-                {ErrorCodes::FileReadError, "Ошибка чтения файла" }
+                {ErrorCodes::FileOpenError, "Ошибка открытия файла" }
+                , {ErrorCodes::FileReadError, "Ошибка чтения файла" }
+                , {ErrorCodes::FileEmpty, "Файл, не содержит выражений" }
+                , {ErrorCodes::FileParseError, "Файл содержит не валидное выражение" }
             };
             if (base.find(key) == base.end()) {
                 to_log("Неизвестная ошибка!");
@@ -156,12 +162,6 @@ namespace COURSE_WORK {
             to_log(std::move(base[key]));
         }
 
-        /* */
-        constexpr void
-        showBody() {
-
-
-        }
 
         /* Принимаем данные от пользователя (путь к файлу с выражением постфиксной (польской) формой записи) */
         constexpr std::decay_t<Type>
@@ -171,21 +171,33 @@ namespace COURSE_WORK {
             out << generatingString("ВВЕДИТЕ ПУТЬ К ФАЙЛУ:") << "\n";
             out << delimiter(' ') << "\n";
             out << std::string(widthTable, '_');
-            out << std::string(widthTable, '\b');
+            out << std::string(widthTable, '\b');            
             
             in >> filename;
             return filename;
         }
 
 
-        /*  */
-        template <typename Iter, typename = std::enable_if_t<is_iterable<Iter>>>
+        /* Печатает в вывод выражение и его результат */
+        template <typename Con, typename = std::enable_if_t<is_container_v<Con>>>
         constexpr void
-        toCaclBuffer(Iter begin, Iter end) {
-            auto it{ begin };
-            while (it != end) {
-                calcBuffer.push(*it);
+        showBody(Con& con, long long resultExpression) {
+            auto it{ con.begin() };
+            toBuffer(delimiter(' '));
+            toBuffer(delimiter());
+            toBuffer(generatingString("Выражение:"));
+            toBuffer(delimiter('-'));
+            while ( it != con.end() ) {
+                toBuffer(generatingString(*it));
+                ++it;
             }
+            toBuffer(delimiter('-'));
+            toBuffer(generatingString("Результат выражения:"));
+            toBuffer(delimiter('-'));
+            toBuffer(generatingString(std::to_string(resultExpression)));
+            toBuffer(delimiter());
+
+            flush();
         }
 
 
