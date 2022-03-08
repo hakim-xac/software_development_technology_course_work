@@ -23,22 +23,26 @@ namespace COURSE_WORK {
         /  возвращает контейнер с операндами и true, если успешно чтение
         /  возвращает пустой контейнер и false, если чтение не успешное
         /  */
-        constexpr std::pair<std::vector<std::string>, ErrorCodes>
+        constexpr std::tuple<std::vector<std::string>, long long, ErrorCodes>
             readFile(const Type& str) const {
             std::ifstream fs{ str };
             std::vector<std::string> vec;
             if (!fs.is_open()) {
-                return { vec, ErrorCodes::FileOpenError };
+                fs.close();
+                return { vec, 0, ErrorCodes::FileOpenError };
             }
-
+            fs.seekg(0, std::ios_base::end);
+            long long fileSize{ fs.tellg() };
+            fs.seekg(0, std::ios_base::beg);
             vec.reserve(2ull << 10);
             std::string s;
             while (fs >> s) {
                 vec.emplace_back(s);
             }
+            fs.close();
             vec.shrink_to_fit();
-            if (vec.empty()) return { vec, ErrorCodes::FileEmpty };
-            return { vec, ErrorCodes::FileIsOpen };
+            if (vec.empty()) return { vec, 0, ErrorCodes::FileEmpty };
+            return { vec, fileSize, ErrorCodes::FileIsOpen};
         }
 
 
@@ -54,11 +58,14 @@ namespace COURSE_WORK {
                                
                 if (*it == "+") {
                     if(stack.size() < 2) return { 0, ErrorCodes::FileParseError };
+
                     auto r{ stack.top() };
                     stack.pop();
                     auto l{ stack.top() };
                     stack.pop();
-                    stack.push(l + r);
+                    double result{ l + r };
+                    stack.push(result);
+
                 }
                 else if (*it == "-") {
                     if (stack.size() < 2) return { 0, ErrorCodes::FileParseError };
@@ -74,6 +81,7 @@ namespace COURSE_WORK {
                     stack.pop();
                     auto l{ stack.top() };
                     stack.pop();
+                    if(r == 0) return { 0, ErrorCodes::DivideOrModByZero };
                     stack.push(l / r);
                 }
                 else if (*it == "*") {
@@ -101,7 +109,7 @@ namespace COURSE_WORK {
                     ss << *it;
                     double tmp;
                     ss >> tmp;
-                    if( ss.fail() ) return { 0, ErrorCodes::FileParseError };
+                    if (ss.fail()) return { 0, ErrorCodes::FileParseError };
                     stack.push(tmp);
                 }
                 ++it;
@@ -122,11 +130,11 @@ namespace COURSE_WORK {
         /* главная функция-член, запрашивает путь к файлу с выражением и выполняет его, если оно без ошибок */
         constexpr void loop() {
 
-            //std::ios::sync_with_stdio(0);
+            std::ios::sync_with_stdio(0);
             setlocale(LC_ALL, "Russian");
 
             showHeader();
-            auto [vec, isRead] = readFile( inputRead() );
+            auto [vec, fileSize, isRead] = readFile( inputRead() );
 
             BENCHMARK::BenchMark start{};                   
 
@@ -140,7 +148,7 @@ namespace COURSE_WORK {
                 return;
             }
 
-            showBody(vec, result);
+            showBody(vec, fileSize, result);
             BENCHMARK::BenchMark end{};
             std::cout << "\nВремя работы программы:\t" << end.diffirence(start) << "\n";
         }

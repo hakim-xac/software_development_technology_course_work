@@ -14,6 +14,8 @@ enum class ErrorCodes {
     , FileOpenError
     , FileReadError
     , FileParseError
+    , StackOverflow
+    , DivideOrModByZero
 };
 
 

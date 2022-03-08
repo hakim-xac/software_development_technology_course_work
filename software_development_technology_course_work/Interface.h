@@ -52,7 +52,7 @@ namespace COURSE_WORK {
         constexpr Type
             generatingString(Type& str
                 , char del = ' '
-                , FormatingType ft = FormatingType::STANDART) {
+                , FormatingType ft = FormatingType::JUSTIFY) {
             return generatingString(std::move(str), Type(""), del, ft);
         }
 
@@ -62,7 +62,7 @@ namespace COURSE_WORK {
         generatingString(Type&& str
             , Type&& str2 = Type("")
             , char del = ' '
-            , FormatingType ft = FormatingType::STANDART) {
+            , FormatingType ft = FormatingType::JUSTIFY) {
 
             /// <param name="first_str">первая строка, располагается слева (или по центру, если 2 строка пуста)</param>
             /// <param name="second_str"> правая строка</param>
@@ -76,6 +76,7 @@ namespace COURSE_WORK {
             tmp.front() = tmp.back() = '#';
             if (str.empty()) return tmp;						// если str пусто, равносильно delimiter
             if (str.size() > widthTable) throw;
+            
 
 
             auto first_offset{ str.size() % 2 ? 0 : 1 };
@@ -150,10 +151,12 @@ namespace COURSE_WORK {
         constexpr void
             showError(ErrorCodes key) {
             static std::map<ErrorCodes, std::string> base{
-                {ErrorCodes::FileOpenError, "Ошибка открытия файла" }
-                , {ErrorCodes::FileReadError, "Ошибка чтения файла" }
-                , {ErrorCodes::FileEmpty, "Файл, не содержит выражений" }
-                , {ErrorCodes::FileParseError, "Файл содержит не валидное выражение" }
+                {   ErrorCodes::FileOpenError,      "Ошибка открытия файла"                 }
+                , { ErrorCodes::FileReadError,      "Ошибка чтения файла"                   }
+                , { ErrorCodes::FileEmpty,          "Файл, не содержит выражений"           }
+                , { ErrorCodes::FileParseError,     "Файл содержит не валидное выражение"   }
+                , { ErrorCodes::StackOverflow,      "Переполнение типа!"                    }
+                , { ErrorCodes::DivideOrModByZero,  "Деление на ноль запрещено!"            }
             };
             if (base.find(key) == base.end()) {
                 to_log("Неизвестная ошибка!");
@@ -179,27 +182,39 @@ namespace COURSE_WORK {
 
 
         /* Печатает в вывод выражение и его результат */
-        template <typename Con, typename = std::enable_if_t<is_container_v<Con>>>
+        template <typename VecString, typename Sz, typename = std::enable_if_t<is_container_v<VecString>>>
         constexpr void
-        showBody(Con& con, double resultExpression) {
+        showBody(VecString& con, Sz fileSize, double resultExpression) {
             auto it{ con.begin() };
             toBuffer(delimiter(' '));
             toBuffer(delimiter());
             toBuffer(generatingString("Выражение:"));
             toBuffer(delimiter('-'));
             while ( it != con.end() ) {
+                if ((*it).size() > widthTable) {
+                    showError(ErrorCodes::StackOverflow);
+                    return;
+                }
                 toBuffer(generatingString(*it));
                 ++it;
             }
             toBuffer(delimiter('-'));
             toBuffer(generatingString("Результат выражения:"));
             toBuffer(delimiter('-'));
+
             if (static_cast<double>(static_cast<long>(resultExpression)) == resultExpression) {
                 toBuffer(generatingString(std::to_string(static_cast<long>(resultExpression))));
             }
             else {
-                toBuffer(generatingString(std::to_string(resultExpression)));
+                std::string resultExpressionString{ std::to_string(resultExpression) };
+                if (resultExpressionString.size() > widthTable) {
+                    showError(ErrorCodes::StackOverflow);
+                    return;
+                }
+                toBuffer(generatingString(resultExpressionString));
             }
+            toBuffer(delimiter('-'));
+            toBuffer(generatingString("Размер файла:", std::to_string(fileSize)));
             toBuffer(delimiter());
 
             flush();
