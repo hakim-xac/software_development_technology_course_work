@@ -1,6 +1,8 @@
 #pragma once
 #include "include_modules.h"
 #include "Interface.h"
+#include "benchmark.h"
+
 
 namespace COURSE_WORK {
     template <typename Type
@@ -120,11 +122,14 @@ namespace COURSE_WORK {
         /* главная функция-член, запрашивает путь к файлу с выражением и выполняет его, если оно без ошибок */
         constexpr void loop() {
 
-            std::ios::sync_with_stdio(0);
+            //std::ios::sync_with_stdio(0);
             setlocale(LC_ALL, "Russian");
 
             showHeader();
             auto [vec, isRead] = readFile( inputRead() );
+
+            BENCHMARK::BenchMark start{};                   
+
             if (isRead != ErrorCodes::FileIsOpen) {
                 showError(isRead);
                 return;
@@ -136,6 +141,8 @@ namespace COURSE_WORK {
             }
 
             showBody(vec, result);
+            BENCHMARK::BenchMark end{};
+            std::cout << "\nВремя работы программы:\t" << end.diffirence(start) << "\n";
         }
 
     };
