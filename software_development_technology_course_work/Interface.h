@@ -148,7 +148,7 @@ namespace COURSE_WORK {
 
         /* Печатаем ошибку на вывод */
         constexpr void
-        showError(ErrorCodes key) {
+            showError(ErrorCodes key) {
             static std::map<ErrorCodes, std::string> base{
                 {ErrorCodes::FileOpenError, "Ошибка открытия файла" }
                 , {ErrorCodes::FileReadError, "Ошибка чтения файла" }
@@ -158,13 +158,13 @@ namespace COURSE_WORK {
             if (base.find(key) == base.end()) {
                 to_log("Неизвестная ошибка!");
                 return;
-            }
-            to_log(std::move(base[key]));
+            } 
+            to_log(std::move(base[key]));            
         }
 
 
         /* Принимаем данные от пользователя (путь к файлу с выражением постфиксной (польской) формой записи) */
-        constexpr std::decay_t<Type>
+        constexpr Type
         inputRead() {
             Type filename{};
             out << delimiter(' ') << "\n";
@@ -181,7 +181,7 @@ namespace COURSE_WORK {
         /* Печатает в вывод выражение и его результат */
         template <typename Con, typename = std::enable_if_t<is_container_v<Con>>>
         constexpr void
-        showBody(Con& con, long long resultExpression) {
+        showBody(Con& con, double resultExpression) {
             auto it{ con.begin() };
             toBuffer(delimiter(' '));
             toBuffer(delimiter());
@@ -194,7 +194,12 @@ namespace COURSE_WORK {
             toBuffer(delimiter('-'));
             toBuffer(generatingString("Результат выражения:"));
             toBuffer(delimiter('-'));
-            toBuffer(generatingString(std::to_string(resultExpression)));
+            if (static_cast<double>(static_cast<long>(resultExpression)) == resultExpression) {
+                toBuffer(generatingString(std::to_string(static_cast<long>(resultExpression))));
+            }
+            else {
+                toBuffer(generatingString(std::to_string(resultExpression)));
+            }
             toBuffer(delimiter());
 
             flush();

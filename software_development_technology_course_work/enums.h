@@ -11,9 +11,19 @@ enum class ErrorCodes {
     AllGood
     , FileIsOpen
     , FileEmpty
-    , FileNotValid
     , FileOpenError
     , FileReadError
     , FileParseError
+};
+
+
+/* Коды ошибок, используемые в проекте */
+enum class ErrorOperations {
+    Plus
+    , Minus
+    , Multiply
+    , Divide
+    , Sin
+    , Cos
 };
 

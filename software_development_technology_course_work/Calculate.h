@@ -42,16 +42,16 @@ namespace COURSE_WORK {
 
         /*  производит проверку и вычисление выражения  */
         template <typename Iter, typename = std::enable_if_t<is_iterable_v<Iter>>>
-        constexpr std::pair<long long, ErrorCodes>
+        constexpr std::pair<double, ErrorCodes>
         parse(Iter begin, Iter end) const {
-            if(end - begin < 3) return { 0ll, ErrorCodes::FileNotValid };
-            std::stack<long long> stack;
+            if(end - begin < 2) return { 0, ErrorCodes::FileParseError }; 
+            std::stack<double> stack;
             auto it{ begin };
             std::stringstream ss;
             while (it != end) {
                                
                 if (*it == "+") {
-                    if(stack.size() < 2) return { 0ll, ErrorCodes::FileParseError };
+                    if(stack.size() < 2) return { 0, ErrorCodes::FileParseError };
                     auto r{ stack.top() };
                     stack.pop();
                     auto l{ stack.top() };
@@ -59,7 +59,7 @@ namespace COURSE_WORK {
                     stack.push(l + r);
                 }
                 else if (*it == "-") {
-                    if (stack.size() < 2) return { 0ll, ErrorCodes::FileParseError };
+                    if (stack.size() < 2) return { 0, ErrorCodes::FileParseError };
                     auto r{ stack.top() };
                     stack.pop();
                     auto l{ stack.top() };
@@ -67,7 +67,7 @@ namespace COURSE_WORK {
                     stack.push(l - r);
                 }
                 else if (*it == "/") {
-                    if (stack.size() < 2) return { 0ll, ErrorCodes::FileParseError };
+                    if (stack.size() < 2) return { 0, ErrorCodes::FileParseError };
                     auto r{ stack.top() };
                     stack.pop();
                     auto l{ stack.top() };
@@ -75,19 +75,31 @@ namespace COURSE_WORK {
                     stack.push(l / r);
                 }
                 else if (*it == "*") {
-                    if (stack.size() < 2) return { 0ll, ErrorCodes::FileParseError };
+                    if (stack.size() < 2) return { 0, ErrorCodes::FileParseError };
                     auto r{ stack.top() };
                     stack.pop();
                     auto l{ stack.top() };
                     stack.pop();
                     stack.push(l * r);
                 }
+                else if (*it == "sin") {
+                    if (stack.size() < 1) return { 0, ErrorCodes::FileParseError };
+                    auto l{ stack.top() };
+                    stack.pop();
+                    stack.push(sin(l));
+                }
+                else if (*it == "cos") {
+                    if (stack.size() < 1) return { 0, ErrorCodes::FileParseError };
+                    auto l{ stack.top() };
+                    stack.pop();
+                    stack.push(cos(l));
+                }
                 else {
                     ss.clear();
                     ss << *it;
-                    long long tmp;
+                    double tmp;
                     ss >> tmp;
-                    if( ss.fail() ) return { 0ll, ErrorCodes::FileParseError };
+                    if( ss.fail() ) return { 0, ErrorCodes::FileParseError };
                     stack.push(tmp);
                 }
                 ++it;
