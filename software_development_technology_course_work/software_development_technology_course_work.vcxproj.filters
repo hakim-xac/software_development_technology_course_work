@@ -18,12 +18,6 @@
     <ClCompile Include="software_development_technology_course_work.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Interface.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="Calculate.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="benchmark.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>

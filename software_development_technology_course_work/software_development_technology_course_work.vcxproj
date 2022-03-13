@@ -147,8 +147,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="benchmark.cpp" />
-    <ClCompile Include="Calculate.cpp" />
-    <ClCompile Include="Interface.cpp" />
     <ClCompile Include="software_development_technology_course_work.cpp" />
   </ItemGroup>
   <ItemGroup>
