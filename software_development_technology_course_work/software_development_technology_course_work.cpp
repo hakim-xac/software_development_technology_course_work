@@ -5,8 +5,12 @@
 
 int main()
 {
+    /*
+   // ТОЧКА ВХОДА
+    */
     using namespace COURSE_WORK;
-    Calculate<std::string> window;
+    constexpr int maxTableRowWidth{ 100 };
+    Calculate<std::string> window(maxTableRowWidth);
 
     window.loop();
 

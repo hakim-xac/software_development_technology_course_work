@@ -1,6 +1,5 @@
 #pragma once
 #include "include_modules.h"
-//#include "Calculate.h"
 
 namespace COURSE_WORK {   
 
@@ -11,12 +10,11 @@ namespace COURSE_WORK {
         class Interface
     {
                                         /* Класс-Интерфейс */
+        /// класс работает с потоком вывода и отправляет данные в поток, в виде форматированных строк.
 
         /*	максимальная ширина строки	*/
-        static constexpr const size_t widthTable{ 100 };
+        int widthTable;
         std::queue<Type> buffer;
-        std::queue<Type> calcBuffer;
-        Type filename;
     protected:                                               /* PROTECTED SECTIONS */
 
         std::istream& in;
@@ -30,7 +28,7 @@ namespace COURSE_WORK {
             , конструктор копирования
             , конструктор перемещения
             , оператор копирования
-            , опретор перемещения 
+            , оператор перемещения 
         */
         Interface() = delete;
         Interface(const Interface&) = delete;
@@ -50,7 +48,7 @@ namespace COURSE_WORK {
         /*  создает строку по определенному формату */
         //  принимает 1 левый параметр 
         constexpr Type
-            generatingString(Type& str
+        generatingString(Type& str
                 , char del = ' '
                 , FormatingType ft = FormatingType::JUSTIFY) {
             return generatingString(std::move(str), Type(""), del, ft);
@@ -146,6 +144,17 @@ namespace COURSE_WORK {
 
     protected:                                              /* PROTECTED SECTIONS */
 
+        /* конструктор */
+        Interface(int width, std::istream& in, std::ostream& out, std::ostream& err)
+            : widthTable(width)
+            , buffer()
+            , in(in)
+            , out(out)
+            , err(err) {}
+
+        /* деструктор */
+        ~Interface() {}
+
 
         /* Печатаем ошибку на вывод */
         constexpr void
@@ -237,24 +246,6 @@ namespace COURSE_WORK {
             toBuffer(delimiter());
 
             flush();
-        }
-    public:
-
-
-        /* конструктор */
-        Interface(std::istream& in, std::ostream& out, std::ostream& err)
-        : in(in)
-        , out(out)
-        , err(err)
-        , buffer() {}
-
-                
-        /* деструктор */
-        ~Interface() {}
-
-
-
-
-        
+        }        
     };
 }

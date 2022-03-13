@@ -9,6 +9,11 @@ namespace COURSE_WORK {
         , typename = std::enable_if_t <std::is_same_v<Type, std::string>>>
     class Calculate : public Interface<Type>
     {
+        /// <summary>
+        /// Класс читает из файла выражение в постфиксной(польской) форме записи.
+        /// Парсит его и обрабатывает ошибки.
+        /// 
+        /// </summary>
         using Interface<Type>::showHeader;
         using Interface<Type>::showBody;
         using Interface<Type>::showError;
@@ -46,10 +51,10 @@ namespace COURSE_WORK {
         }
 
 
-        /*  производит проверку и вычисление выражения  */
+        /*  производит проверку и вычисляет выражение  */
         template <typename Iter, typename = std::enable_if_t<is_iterable_v<Iter>>>
         constexpr std::pair<double, ErrorCodes>
-        parse(Iter begin, Iter end) const {
+        parse(Iter begin, Iter end) const noexcept {
             if(end - begin < 2) return { 0, ErrorCodes::FileParseError }; 
             std::stack<double> stack;
             auto it{ begin };
@@ -119,24 +124,26 @@ namespace COURSE_WORK {
 
     public:                                                 /* PUBLIC SECTIONS */
 
-        Calculate()
-        : Interface<Type>(std::cin, std::cout, std::cerr) {}
+        Calculate(int widthTable)
+        : Interface<Type>(widthTable, std::cin, std::cout, std::cerr) {}
 
-        Calculate( std::istream& in, std::ostream& out, std::ostream& err)
-        : Interface<Type>(in, out, err) {}
+        Calculate(int widthTable, std::istream& in, std::ostream& out, std::ostream& err)
+        : Interface<Type>(widthTable, in, out, err) {}
 
 
 
-        /* главная функция-член, запрашивает путь к файлу с выражением и выполняет его, если оно без ошибок */
-        constexpr void loop() {
+        /* Главная функция-член, запрашивает путь к файлу с выражением и выполняет его, если оно без ошибок.
+        Результат отправляет на вывод Interface::out */
+        constexpr void loop() noexcept {
 
             std::ios::sync_with_stdio(0);
             setlocale(LC_ALL, "Russian");
 
             showHeader();
-            auto [vec, fileSize, isRead] = readFile( inputRead() );
 
-            BENCHMARK::BenchMark start{};                   
+            auto [vec, fileSize, isRead] = readFile( inputRead() );  
+
+            BENCHMARK::BenchMark start{};                 
 
             if (isRead != ErrorCodes::FileIsOpen) {
                 showError(isRead);

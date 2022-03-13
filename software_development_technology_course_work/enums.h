@@ -6,7 +6,7 @@ enum class FormatingType{
 };
 
 
-/* Коды ошибок, используемые в проекте */
+/* Коды ошибок, используемые в программе */
 enum class ErrorCodes {
     AllGood
     , FileIsOpen
@@ -16,16 +16,5 @@ enum class ErrorCodes {
     , FileParseError
     , StackOverflow
     , DivideOrModByZero
-};
-
-
-/* Коды ошибок, используемые в проекте */
-enum class ErrorOperations {
-    Plus
-    , Minus
-    , Multiply
-    , Divide
-    , Sin
-    , Cos
 };
 

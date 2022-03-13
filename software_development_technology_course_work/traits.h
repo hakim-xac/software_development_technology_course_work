@@ -14,6 +14,8 @@ namespace COURSE_WORK
         , decltype(++std::declval<Iter&>())
         >> : std::true_type {};
     // } end block is_iterable
+    
+    
     // { start block is_container
     template <typename T, typename = void>
     struct is_container : std::false_type {};
