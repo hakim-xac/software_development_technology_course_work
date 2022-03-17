@@ -146,18 +146,21 @@ namespace COURSE_WORK {
             BENCHMARK::BenchMark start{};                 
 
             if (isRead != ErrorCodes::FileIsOpen) {
-                showError(isRead);
+                showError(isRead); 
+                system("pause");
                 return;
             }
             auto [result, isParse] = parse(vec.begin(), vec.end());
             if (isParse != ErrorCodes::AllGood) {
                 showError(isParse);
+                system("pause");
                 return;
             }
 
             showBody(vec, fileSize, result);
             BENCHMARK::BenchMark end{};
             std::cout << "\nВремя работы программы:\t" << end.diffirence(start) << "\n";
+            system("pause");
         }
 
     };
