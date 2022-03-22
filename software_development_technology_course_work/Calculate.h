@@ -1,7 +1,6 @@
 #pragma once
 #include "include_modules.h"
 #include "Interface.h"
-#include "benchmark.h"
 
 
 namespace COURSE_WORK {
@@ -16,6 +15,7 @@ namespace COURSE_WORK {
         /// </summary>
         using Interface<Type>::showHeader;
         using Interface<Type>::showBody;
+        using Interface<Type>::showBenchmark;
         using Interface<Type>::showError;
         using Interface<Type>::inputRead;
         using Interface<Type>::out;
@@ -68,7 +68,8 @@ namespace COURSE_WORK {
                     stack.pop();
                     auto l{ stack.top() };
                     stack.pop();
-                    double result{ l + r };
+                    auto result{ l + r };
+                    if (std::isinf(result)) return { 0, ErrorCodes::IsInfinity };
                     stack.push(result);
 
                 }
@@ -95,7 +96,9 @@ namespace COURSE_WORK {
                     stack.pop();
                     auto l{ stack.top() };
                     stack.pop();
-                    stack.push(l * r);
+                    auto result{ l * r };
+                    if(std::isinf(result)) return { 0, ErrorCodes::IsInfinity };
+                    stack.push(result);
                 }
                 else if (*it == "sin") {
                     if (stack.size() < 1) return { 0, ErrorCodes::FileParseError };
@@ -134,7 +137,7 @@ namespace COURSE_WORK {
 
         /* Ãëàâíàÿ ôóíêöèÿ-÷ëåí, çàïðàøèâàåò ïóòü ê ôàéëó ñ âûðàæåíèåì è âûïîëíÿåò åãî, åñëè îíî áåç îøèáîê.
         Ðåçóëüòàò îòïðàâëÿåò íà âûâîä Interface::out */
-        constexpr void loop() noexcept {
+        constexpr void start() noexcept {
 
             std::ios::sync_with_stdio(0);
             setlocale(LC_ALL, "Russian");
@@ -143,7 +146,7 @@ namespace COURSE_WORK {
 
             auto [vec, fileSize, isRead] = readFile( inputRead() );  
 
-            BENCHMARK::BenchMark start{};                 
+            BENCHMARK::BenchMark start{};                           /* ÍÀ×ÀËÎ ÇÀÌÅÐÀ ÂÐÅÌÅÍÈ ÐÀÁÎÒÛ ÏÐÎÃÐÀÌÌÛ */
 
             if (isRead != ErrorCodes::FileIsOpen) {
                 showError(isRead); 
@@ -158,8 +161,10 @@ namespace COURSE_WORK {
             }
 
             showBody(vec, fileSize, result);
-            BENCHMARK::BenchMark end{};
-            std::cout << "\nÂðåìÿ ðàáîòû ïðîãðàììû:\t" << end.diffirence(start) << "\n";
+            BENCHMARK::BenchMark end{};                             /* ÊÎÍÅÖ ÇÀÌÅÐÀ ÂÐÅÌÅÍÈ ÐÀÁÎÒÛ ÏÐÎÃÐÀÌÌÛ */
+
+            showBenchmark(start, end);                              /* ÂÛÂÎÄ Â ÁÓÔÅÐ ÐÅÇÓËÜÒÀÒÀ ÇÀÌÅÐÀ */
+
             system("pause");
         }
 

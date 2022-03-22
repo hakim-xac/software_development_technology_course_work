@@ -1,5 +1,6 @@
 #pragma once
 #include "include_modules.h"
+#include "benchmark.h"
 
 namespace COURSE_WORK {   
 
@@ -73,14 +74,15 @@ namespace COURSE_WORK {
             auto tmp{ Type(widthTable, del) };
             tmp.front() = tmp.back() = '#';
             if (str.empty()) return tmp;						// если str пусто, равносильно delimiter
-            if (str.size() > widthTable) throw;
+            if (str.size() > widthTable) 
+                throw std::exception(std::string("Длина строки больше заданного размера!\t" + std::to_string(widthTable)).c_str());
             
 
 
             auto first_offset{ str.size() % 2 ? 0 : 1 };
 
             if (str2.empty()) {
-                insertInString(tmp, (widthTable >> 1) + first_offset - (str.size() >> 1), str);
+                insertInString(tmp, (widthTable >> 1) + first_offset - (str.size() >> 1) - 1, str);
             }
             else {
 
@@ -104,10 +106,10 @@ namespace COURSE_WORK {
         /* вставляет в строку to в позицию pos, строку in, замещая собой символы строки to */
         constexpr void 
         insertInString(Type& to, std::size_t pos, const Type& in ) const {
-            if (to.empty())						throw;
-            if (to.size() < pos)				throw;
-            if (to.size() < in.size())			throw;
-            if ((to.size() - pos) < in.size())	throw;
+            if (to.empty())						throw std::exception("Строка пуста!");
+            if (to.size() < pos)				throw std::exception("Размер строки меньше позиции вставки!");
+            if (to.size() < in.size())			throw std::exception("Строка донор меньше вставляемой строки !");
+            if ((to.size() - pos) < in.size())	throw std::exception("Строка донор меньше вставляемой строки !");
 
             to.replace(pos, in.size(), in);
         }
@@ -136,7 +138,9 @@ namespace COURSE_WORK {
         template <typename... Args>
         constexpr void
         to_log(Args&&... args) {
+            err << delimiter(' ') << "\n";
             err << delimiter('-') << "\n";
+            err << generatingString("ОШИБКА!!!") << "\n";
             ((err << generatingString(std::forward<Args>(args), "", ' ') << "\n"), ...);
             err << delimiter('-') << "\n";
         }
@@ -160,12 +164,13 @@ namespace COURSE_WORK {
         constexpr void
             showError(ErrorCodes key) {
             static std::map<ErrorCodes, std::string> base{
-                {   ErrorCodes::FileOpenError,      "Ошибка открытия файла"                 }
-                , { ErrorCodes::FileReadError,      "Ошибка чтения файла"                   }
-                , { ErrorCodes::FileEmpty,          "Файл, не содержит выражений"           }
-                , { ErrorCodes::FileParseError,     "Файл содержит не валидное выражение"   }
-                , { ErrorCodes::StackOverflow,      "Переполнение типа!"                    }
-                , { ErrorCodes::DivideOrModByZero,  "Деление на ноль запрещено!"            }
+                {   ErrorCodes::FileOpenError,      "Ошибка открытия файла"                     }
+                , { ErrorCodes::FileReadError,      "Ошибка чтения файла"                       }
+                , { ErrorCodes::FileEmpty,          "Файл, не содержит выражений"               }
+                , { ErrorCodes::FileParseError,     "Файл содержит не валидное выражение"       }
+                , { ErrorCodes::StackOverflow,      "Переполнение типа!"                        }
+                , { ErrorCodes::DivideOrModByZero,  "Деление на ноль запрещено!"                }
+                , { ErrorCodes::IsInfinity,         "Результат выражения равен бесконечности!"  }
             };
             if (base.find(key) == base.end()) {
                 to_log("Неизвестная ошибка!");
@@ -210,18 +215,27 @@ namespace COURSE_WORK {
             toBuffer(delimiter('-'));
             toBuffer(generatingString("Результат выражения:"));
             toBuffer(delimiter('-'));
+            toBuffer(delimiter(' '));
 
-            if (static_cast<double>(static_cast<long>(resultExpression)) == resultExpression) {
-                toBuffer(generatingString(std::to_string(static_cast<long>(resultExpression))));
+            std::string resultExpressionString{ std::to_string(resultExpression) };
+            auto count{ resultExpressionString.size() / widthTable };
+            if (count) {
+                for (decltype(count) i{ 0 }, i_end{ count + 1 }; i < i_end; ++i) {
+                    std::string result;
+                    auto page{ widthTable * i };
+                    auto begin{ resultExpressionString.begin() + page };
+                    auto offset{ resultExpressionString.end() - begin };
+                    auto end{ begin + (offset > widthTable ? widthTable : offset) };
+                    if (resultExpressionString.end() < end) end = resultExpressionString.end();
+                    std::copy(begin, end, std::back_inserter(result));
+                    toBuffer(generatingString(result));
+                }
             }
             else {
-                std::string resultExpressionString{ std::to_string(resultExpression) };
-                if (resultExpressionString.size() > widthTable) {
-                    showError(ErrorCodes::StackOverflow);
-                    return;
-                }
                 toBuffer(generatingString(resultExpressionString));
             }
+            
+            toBuffer(delimiter(' '));
             toBuffer(delimiter('-'));
             toBuffer(generatingString("Размер файла:", std::to_string(fileSize)));
             toBuffer(delimiter());
@@ -246,6 +260,21 @@ namespace COURSE_WORK {
             toBuffer(delimiter());
 
             flush();
-        }        
+        } 
+
+
+        /* Вывод информации о времени работы программы */
+        template <typename T>
+        constexpr void
+            showBenchmark(T&& start, T&& end) noexcept {
+            toBuffer(delimiter('-'));
+            toBuffer(delimiter(' '));
+            auto diff{ end.diffirence(std::forward<T>(start)) };
+            toBuffer(generatingString("Время работы программы:", std::to_string(diff.count()) + std::string("ms")));
+
+            toBuffer(delimiter(' '));
+            toBuffer(delimiter('-'));
+            flush();
+        }
     };
 }
