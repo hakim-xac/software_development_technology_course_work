@@ -8,6 +8,7 @@ namespace BENCHMARK {
 	public:
 
 		BenchMark();
+		BenchMark(const BenchMark& lhs);
 		std::chrono::milliseconds diffirence(const BenchMark& time);
 	};
 }

@@ -16,5 +16,6 @@ enum class ErrorCodes {
     , FileParseError
     , StackOverflow
     , DivideOrModByZero
+    , IsInfinity
 };
 

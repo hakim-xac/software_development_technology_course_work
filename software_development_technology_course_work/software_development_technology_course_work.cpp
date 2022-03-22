@@ -12,6 +12,6 @@ int main()
     constexpr int maxTableRowWidth{ 100 };
     Calculate<std::string> window(maxTableRowWidth);
 
-    window.loop();
+    window.start();
 
 }
