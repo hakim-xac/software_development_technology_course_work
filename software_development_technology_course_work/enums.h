@@ -17,6 +17,5 @@ enum class ErrorCodes {
     , StackOverflow
     , DivideOrModByZero
     , IsInfinity
-    , ConversionError
 };
 

@@ -57,7 +57,7 @@ namespace COURSE_WORK {
         parse(Iter begin, Iter end) const noexcept {
 
             if(end - begin < 2) return { 0, ErrorCodes::FileParseError }; 
-            std::stack<long double> stack;
+            std::stack<double> stack;
             auto it{ begin };
             std::stringstream ss;
             while (it != end) {
@@ -116,7 +116,7 @@ namespace COURSE_WORK {
                 else {
                     ss.clear();
                     ss << *it;
-                    long double tmp;
+                    double tmp;
                     ss >> tmp;
                     if (ss.fail()) return { 0, ErrorCodes::FileParseError };
                     stack.push(tmp);
@@ -128,10 +128,10 @@ namespace COURSE_WORK {
 
     public:                                                 /* PUBLIC SECTIONS */
 
-        Calculate(int widthTable) noexcept
+        Calculate(int widthTable)
         : Interface<Type>(widthTable, std::cin, std::cout, std::cerr) {}
 
-        Calculate(int widthTable, std::istream& in, std::ostream& out, std::ostream& err) noexcept
+        Calculate(int widthTable, std::istream& in, std::ostream& out, std::ostream& err)
         : Interface<Type>(widthTable, in, out, err) {}
 
 
