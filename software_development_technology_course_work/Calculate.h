@@ -57,7 +57,7 @@ namespace COURSE_WORK {
         parse(Iter begin, Iter end) const noexcept {
 
             if(end - begin < 2) return { 0, ErrorCodes::FileParseError }; 
-            std::stack<double> stack;
+            std::stack<long double> stack;
             auto it{ begin };
             std::stringstream ss;
             while (it != end) {
@@ -116,7 +116,7 @@ namespace COURSE_WORK {
                 else {
                     ss.clear();
                     ss << *it;
-                    double tmp;
+                    long double tmp;
                     ss >> tmp;
                     if (ss.fail()) return { 0, ErrorCodes::FileParseError };
                     stack.push(tmp);

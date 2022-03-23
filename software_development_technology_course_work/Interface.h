@@ -134,6 +134,13 @@ namespace COURSE_WORK {
         }
 
 
+        /* очистка буфера */
+        constexpr void clearBuffer() {
+            std::queue<Type> tmp;
+            buffer.swap(tmp);
+        }
+
+
         /* функция логирования */
         template <typename... Args>
         constexpr void
@@ -171,6 +178,7 @@ namespace COURSE_WORK {
                 , { ErrorCodes::StackOverflow,      "Переполнение типа!"                        }
                 , { ErrorCodes::DivideOrModByZero,  "Деление на ноль запрещено!"                }
                 , { ErrorCodes::IsInfinity,         "Результат выражения равен бесконечности!"  }
+                , { ErrorCodes::ConversionError,    "Ошибка преобразования типа!"               }
             };
             if (base.find(key) == base.end()) {
                 to_log("Неизвестная ошибка!");
@@ -198,7 +206,7 @@ namespace COURSE_WORK {
         /* Печатает в вывод выражение и его результат */
         template <typename VecString, typename Sz, typename = std::enable_if_t<is_container_v<VecString>>>
         constexpr void
-        showBody(VecString& con, Sz fileSize, double resultExpression) {
+        showBody(VecString& con, Sz fileSize, long double resultExpression) {
             auto it{ con.begin() };
             toBuffer(delimiter(' '));
             toBuffer(delimiter());
@@ -206,6 +214,7 @@ namespace COURSE_WORK {
             toBuffer(delimiter('-'));
             while ( it != con.end() ) {
                 if ((*it).size() > widthTable) {
+                    clearBuffer();
                     showError(ErrorCodes::StackOverflow);
                     return;
                 }
@@ -217,7 +226,12 @@ namespace COURSE_WORK {
             toBuffer(delimiter('-'));
             toBuffer(delimiter(' '));
 
-            std::string resultExpressionString{ std::to_string(resultExpression) };
+            auto [resultExpressionString, isConvert] = to_string(resultExpression);
+            if (!isConvert) {
+                clearBuffer();
+                showError(ErrorCodes::ConversionError);
+                return;
+            }
             auto count{ resultExpressionString.size() / widthTable };
             if (count) {
                 for (decltype(count) i{ 0 }, i_end{ count + 1 }; i < i_end; ++i) {
@@ -275,6 +289,14 @@ namespace COURSE_WORK {
             toBuffer(delimiter(' '));
             toBuffer(delimiter('-'));
             flush();
+        }
+
+        template <typename T>
+        std::pair<std::string, bool> constexpr to_string(T&& type) {
+            std::ostringstream ss_T;
+            ss_T << std::forward<T>(type);
+            if (ss_T.fail()) return { std::string(""), false };
+            return { ss_T.str(), true };
         }
     };
 }
