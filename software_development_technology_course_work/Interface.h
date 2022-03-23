@@ -291,8 +291,11 @@ namespace COURSE_WORK {
             flush();
         }
 
+
+        /* преобразовывает в строку */
         template <typename T>
-        std::pair<std::string, bool> constexpr to_string(T&& type) {
+        constexpr std::pair<std::string, bool>
+            to_string(T&& type) {
             std::ostringstream ss_T;
             ss_T << std::forward<T>(type);
             if (ss_T.fail()) return { std::string(""), false };
