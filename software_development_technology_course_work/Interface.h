@@ -46,6 +46,7 @@ namespace COURSE_WORK {
             return result;
         }
 
+
         /*  создает строку по определенному формату */
         //  принимает 1 левый параметр 
         constexpr Type
@@ -54,6 +55,7 @@ namespace COURSE_WORK {
                 , FormatingType ft = FormatingType::JUSTIFY) {
             return generatingString(std::move(str), Type(""), del, ft);
         }
+
 
         /*  создает строку по определенному формату */
         //  принимает 2 правых параметра 
@@ -123,7 +125,7 @@ namespace COURSE_WORK {
         }
 
 
-        /* "печатает" в поток out, буфер */
+        /* "печатает" в поток out - буфер */
         constexpr void 
         flush() {
             while (!buffer.empty())
@@ -134,7 +136,7 @@ namespace COURSE_WORK {
         }
 
 
-        /* очистка буфера */
+        /* очищает буфер */
         constexpr void clearBuffer() {
             std::queue<Type> tmp;
             buffer.swap(tmp);
@@ -277,7 +279,7 @@ namespace COURSE_WORK {
         } 
 
 
-        /* Вывод информации о времени работы программы */
+        /* Выводит информацию о времени работы программы, через буфер */
         template <typename T>
         constexpr void
             showBenchmark(T&& start, T&& end) noexcept {
@@ -292,7 +294,7 @@ namespace COURSE_WORK {
         }
 
 
-        /* преобразовывает в строку */
+        /* преобразовывает тип T в строку */
         template <typename T>
         constexpr std::pair<std::string, bool>
             to_string(T&& type) {

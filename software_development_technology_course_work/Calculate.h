@@ -4,6 +4,7 @@
 
 
 namespace COURSE_WORK {
+
     template <typename Type
         , typename = std::enable_if_t <std::is_same_v<Type, std::string>>>
     class Calculate : public Interface<Type>
@@ -21,7 +22,8 @@ namespace COURSE_WORK {
         using Interface<Type>::out;
     private:                                            /* PRIVATE SECTIONS */
 
-        
+        /* Удаляем конструктор по умолчанию */
+        Calculate() = delete;
 
         /* //
         /  Читает файл,
